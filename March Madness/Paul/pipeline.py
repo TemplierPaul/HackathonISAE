@@ -25,6 +25,7 @@ class pipeline():
         
         self.model = None
         self.added_data = []
+        self.doubled_data=[]
         
     def get_history(self):
         m = self.march_madness
@@ -66,6 +67,15 @@ class pipeline():
         self.model = None
         return self
     
+    def compute_differences(self, names):
+        if type(names)!=list and type(names)!=tuple:
+            names = [names]
+        for n in names:
+            self.match_histo[n + '_diff']=self.match_histo[n+'_Team1'] - self.match_histo[n+'_Team2']
+            self.doubled_data.append(n)
+            print("Difference computed on %s" %n)
+        return self
+    
     def train_model(self):
         self.model = RandomForestClassifier(n_estimators = 10)
         self.model.fit(self.match_histo, self.results_histo)
@@ -105,6 +115,9 @@ class pipeline():
                                       right_on=['Season', 'TeamID'], 
                                       suffixes=['_Team1', '_Team2'])
             print('Generated matches merged with %s' %path)
+            
+        for n in self.doubled_data:
+            generated_matches[n + '_diff']=generated_matches[n+'_Team1'] - generated_matches[n+'_Team2']
         
         # Predict probas
         team1_proba = self.model.predict_proba(generated_matches)
