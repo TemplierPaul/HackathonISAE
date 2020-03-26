@@ -7,7 +7,8 @@ from sklearn.model_selection import train_test_split
 
 
 class pipeline():
-    def __init__(self, path='Data_ML/MDataFiles_Stage1/'):
+    def __init__(self, path='Data_ML/MDataFiles_Stage1/', season=2019):
+        self.season = season
         self.march_madness = pd.read_csv(path + 'MNCAATourneyCompactResults.csv')
         self.seeds = pd.read_csv(path + 'MNCAATourneySeeds.csv')
         
@@ -28,7 +29,7 @@ class pipeline():
         self.doubled_data=[]
         
     def get_history(self):
-        m = self.march_madness
+        m = self.march_madness[self.march_madness['Season']<self.season]
 
         m1 = pd.DataFrame()
         m1['Season'] = m['Season']
@@ -49,6 +50,7 @@ class pipeline():
         self.match_histo = pd.concat([m1, m2])
         self.results_histo = self.match_histo['Team1_Win']
         self.match_histo = self.match_histo.drop(columns = ['Team1_Win'])
+        print(self.match_histo['Season'].unique())
         return self
 
     def add_team_data(self, path):
@@ -81,10 +83,10 @@ class pipeline():
         self.model.fit(self.match_histo, self.results_histo)
         return self
     
-    def predict(self, season=2019, out='predict.csv'):
+    def predict(self, out='predict.csv'):
         if self.model is None:
             self.train_model()
-        f = self.seeds['Season']==2018
+        f = self.seeds['Season']==(self.season)
         mad_teams = list(self.seeds[f]['TeamID'])
 
         generated_matches = []
@@ -92,10 +94,10 @@ class pipeline():
         for i in mad_teams:
             for j in mad_teams:
                 if (j, i) not in duos:
-                    #duos.append((i, j))
+                    duos.append((i, j))
                     if i != j:
                         d = {
-                            'Season':season,
+                            'Season':self.season,
                             'ID_Team1':i,
                             'ID_Team2':j,
                             'Team1_Home':0,
