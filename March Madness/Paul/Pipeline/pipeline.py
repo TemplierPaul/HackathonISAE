@@ -137,5 +137,5 @@ class pipeline():
         if out is not None:
             result.to_csv(out, index=False)
             print("Result saved as %s" %out)
-        print('')
+        print('Matches predicted\n')
         return result
