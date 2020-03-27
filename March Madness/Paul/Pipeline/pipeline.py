@@ -1,6 +1,7 @@
 import numpy as np 
 import pandas as pd 
 import matplotlib.pyplot as plt
+import time
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -78,10 +79,11 @@ class pipeline():
             print("Difference computed on %s" %n)
         return self
     
-    def train_model(self):
-        self.model = RandomForestClassifier(n_estimators = 100)
+    def train_model(self, n_estimators = 100):
+        t0=time.time()
+        self.model = RandomForestClassifier(n_estimators = n_estimators)
         self.model.fit(self.match_histo, self.results_histo)
-        print('Model trained on %d matches' %len(self.match_histo))
+        print("Training time: %fs"%(time.time() - t0))
         return self
     
     def predict(self, out=None):
