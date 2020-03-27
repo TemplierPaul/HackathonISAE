@@ -5,6 +5,7 @@ import time
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
 
 
 class pipeline():
@@ -52,6 +53,7 @@ class pipeline():
         self.match_histo = pd.concat([m1, m2])
         self.results_histo = self.match_histo['Team1_Win']
         self.match_histo = self.match_histo.drop(columns = ['Team1_Win'])
+        print("%d matches in history" %len(self.match_histo))
         return self
 
     def add_team_data(self, path):
@@ -79,9 +81,13 @@ class pipeline():
             print("Difference computed on %s" %n)
         return self
     
-    def train_model(self, n_estimators = 100):
+    def train_model(self, n_estimators = 100, model_type='RF'):
+        print('%d features' %len(self.match_histo.columns))
         t0=time.time()
-        self.model = RandomForestClassifier(n_estimators = n_estimators)
+        if model_type=='RF':
+            self.model = RandomForestClassifier(n_estimators = n_estimators)
+        elif model_type=='LR':
+            self.model = LogisticRegression(random_state=0, max_iter=1000)
         self.model.fit(self.match_histo, self.results_histo)
         print("Training time: %fs"%(time.time() - t0))
         return self
@@ -137,5 +143,5 @@ class pipeline():
         if out is not None:
             result.to_csv(out, index=False)
             print("Result saved as %s" %out)
-        print('Matches predicted\n')
+        print('Matches predicted for %d\n' % self.season)
         return result
